@@ -14,22 +14,15 @@ inputs:
 runs:
   using: composite
   steps:
-    - name: 'Set up Github token'
-      id: setup-gh-token
-      shell: bash
-      run: echo "GITHUB_TOKEN=${{ inputs.github-token }}" >> $GITHUB_ENV
-
-    - name: Get our own action repo?
-      uses: actions/checkout@v3
     - name: Verify we were given a URL for Reference
       id: verify-reference
-      uses: ./actions/test-url/'
+      uses: platformsh/gha-check-url@main
       with:
         test_url: ${{ inputs.referenceurl }}
 
     - name: Verify we were given a URL for test
       id: verify-test
-      uses: ./actions/test-url/'
+      uses: platformsh/gha-check-url@main
       with:
         test_url: ${{ inputs.testurl }}
 
