@@ -28,6 +28,7 @@ runs:
 
     - name: install backstop
       shell: bash
+      working-directory: ${{ github.action_path }}
       run: npm install
 
     - name: update backstop config
