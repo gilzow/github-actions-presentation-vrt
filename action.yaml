@@ -23,13 +23,13 @@ runs:
       uses: actions/checkout@v3
     - name: Verify we were given a URL for Reference
       id: verify-reference
-      uses: './actions/test-url/'
+      uses: ./actions/test-url/'
       with:
         test_url: ${{ inputs.referenceurl }}
 
     - name: Verify we were given a URL for test
       id: verify-test
-      uses: '/actions/test-url/'
+      uses: ./actions/test-url/'
       with:
         test_url: ${{ inputs.testurl }}
 
@@ -44,7 +44,7 @@ runs:
 
     - name: run reference
       shell: bash
-      runs: backstop reference
+      run: backstop reference
 
     - name: run test
       id: test-results
