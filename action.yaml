@@ -19,6 +19,8 @@ runs:
       shell: bash
       run: echo "GITHUB_TOKEN=${{ inputs.github-token }}" >> $GITHUB_ENV
 
+    - name: Get our own action repo?
+      uses: actions/checkout@v3
     - name: Verify we were given a URL for Reference
       id: verify-reference
       uses: './actions/test-url/'
@@ -33,23 +35,21 @@ runs:
 
     - name: install backstop
       shell: bash
-      runs: |
-        npm install
+      run: npm install
 
     - name: update backstop config
       shell: bash
-      runs: |
+      run: |
         echo $(cat backstop-orig.json | jq --arg testurl "${{ inputs.testurl }}" --arg refurl "${{ inputs.referenceurl }}" '.scenarios.[].url |= sub("https://example-dev.com/";$testurl) | .scenarios.[].referenceUrl |= sub("https://example.com/";$refurl)') > backstop.json
 
     - name: run reference
       shell: bash
-      runs: |
-        backstop reference
+      runs: backstop reference
 
     - name: run test
       id: test-results
       shell: bash
-      runs: |
+      run: |
         
         suppress=$(backstop test)
         
