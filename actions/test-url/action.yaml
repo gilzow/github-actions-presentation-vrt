@@ -1,0 +1,71 @@
+name: 'Check a URL for a specific header response'
+description: "Given a URL, performs a curl GET request and validates the server response against what we're expecting."
+inputs:
+  test_url:
+    description: 'The URL we want to check'
+    required: true
+  http_response:
+    description: 'The HTTP response status code we expect from the server. Defaults to 200'
+    required: false
+    default: 200
+  allow_insecure:
+    description: 'Should we use the `--insecure` flag with curl when testing the URL? Defaults to false'
+    required: false
+    default: 'false'
+#outputs:
+
+# Things we need to do
+# Make sure they gave us a URL
+# Check the header response code to make sure it's an integer. Ideally we'd verify it's a valid, possible server code
+# make sure they gave us a value we can use for allow_insecure
+# test the url. include the `--insecure` flag if they've ok'ed it
+# @todo should we check the cert security and report it?
+runs:
+  using: "composite"
+  steps:
+    # Set up our environmental variables
+    # Test that the Baseline/Reference URL returns a 200
+    - name: 'Test for valid URL'
+      id: test-baseline-url
+      shell: bash
+      run: |
+        url=${{ inputs.test_url }}
+        urlRE='^https?:\/\/[^\/]+\.[^\.\/\n]{2,}\/?$'
+        if [[ ! "${url}" =~ $urlRE ]]; then
+          echo"::error::The value you gave for URL does not appear to be valid. Please double-check the value you are giving me."
+        fi;
+
+    # Check that what the calling workflow gave us for report_results is something we can use
+    - name: 'Verify allow insecure'
+      id: 'verify-return-vale'
+      shell: bash
+      run: |
+        # we need to make sure they gave us a true/false, yes/no
+        if [[ "${{ inputs.allow_insecure }}" =~ "yes" ]] || [[ "${{ inputs.allow_insecure }}" =~ "true" ]]; then
+          echo "ALLOW_INSECURE=true" >> $GITHUB_ENV
+        fi
+
+    - name: 'Test header response value'
+      id: 'test-header-response-value'
+      shell: bash
+      run: |
+        if [[ ! "${{ inputs.http_response }}" =~ ^[0-9]+$ ]]; then
+          msg="The value you gave for HTTP response status code is not a valid number. Please double check the value you've used, and run the action again."
+          echo "::error::${msg}"
+          exit 1;
+        fi
+
+        echo "RESPONSE_CODE=${{ inputs.http_response }}" >> $GITHUB_ENV
+
+    - name: 'Test the URL for a desired response'
+      id: test-url-for-response
+      shell: bash
+      run: |
+        url=${{ inputs.test_url }}
+        response=$(curl -s -o /dev/null -I -X GET -w "%{http_code}" ${ALLOW_INSECURE:+--insecure} "${url//http:/https:}");
+        if [[ "${RESPONSE_CODE}" == "${response}" ]]; then
+          echo "::notice::Environment responded with http header ${response} as desired."
+        else
+          echo "::error::Response from environment was something other than ${RESPONSE_CODE}. Response returned was ${response}"
+          exit 1;
+        fi

@@ -1,0 +1,16 @@
+{
+  "name": "siteName",
+  "version": "1.0.0",
+  "description": "Backstop testing for siteName",
+  "main": "",
+  "dependencies": {
+    "backstopjs": "^6.1.3",
+    "eslint": "^8.20.0",
+    "minimist": "^1.2.0"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "backstop:reference": "backstop reference --config=backstop_config.js --scenariosPath=backstop_scenarios.js",
+    "backstop:test": "backstop test --config=backstop_config.js --scenariosPath=backstop_scenarios.js"
+  }
+}

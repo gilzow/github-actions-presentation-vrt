@@ -1,0 +1,78 @@
+name: Run VRT
+description: Runs a simple visual regression test using Backstop
+inputs:
+  testurl:
+    description: The test URL that has potential changes
+    type: string
+    required: true
+  referenceurl:
+    description: The URL the test url should be tested against (typically a production URL)
+    type: string
+    required: true
+
+
+runs:
+  using: composite
+  steps:
+    - name: 'Set up Github token'
+      id: setup-gh-token
+      shell: bash
+      run: echo "GITHUB_TOKEN=${{ inputs.github-token }}" >> $GITHUB_ENV
+
+    - name: Verify we were given a URL for Reference
+      id: verify-reference
+      uses: './actions/test-url/'
+      with:
+        test_url: ${{ inputs.referenceurl }}
+
+    - name: Verify we were given a URL for test
+      id: verify-test
+      uses: '/actions/test-url/'
+      with:
+        test_url: ${{ inputs.testurl }}
+
+    - name: install backstop
+      shell: bash
+      runs: |
+        npm install
+
+    - name: update backstop config
+      shell: bash
+      runs: |
+        echo $(cat backstop-orig.json | jq --arg testurl "${{ inputs.testurl }}" --arg refurl "${{ inputs.referenceurl }}" '.scenarios.[].url |= sub("https://example-dev.com/";$testurl) | .scenarios.[].referenceUrl |= sub("https://example.com/";$refurl)') > backstop.json
+
+    - name: run reference
+      shell: bash
+      runs: |
+        backstop reference
+
+    - name: run test
+      id: test-results
+      shell: bash
+      runs: |
+        
+        suppress=$(backstop test)
+        
+        testresults=$?
+        
+        echo "::notice::Visual Regression Testing complete. Preparing results..."
+  
+        if (( 0 != $testresults )); then
+          echo "::error::Backstop visual regression testing failed. Please see the generated report"
+          results="false"
+        else
+          echo "::notice::Backstop visual regression testing passed."
+          results="true"
+        fi
+
+        echo "vrt_results=${results}" >> $GITHUB_ENV  
+
+    - name: 'export reports'
+      id: export-reports
+      if: ${{ env.vrt_results == 'false' }}
+      uses: actions/upload-artifact@v3
+      with:
+        name: vrt-report
+        path: |
+          ${{ github.action_path }}/backstop_data
+          !${{ github.action_path }}/backstop_data/engine_scripts/*
