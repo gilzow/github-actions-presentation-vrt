@@ -31,6 +31,12 @@ runs:
       working-directory: ${{ github.action_path }}
       run: npm install
 
+    - name: 'update jq'
+      uses: dcarbone/install-jq-action@v1.0.1
+      with:
+        version: '1.7'
+        force: true
+
     - name: Setup tmate session
       # if: ${{ failure() }}
       uses: mxschmitt/action-tmate@v3
