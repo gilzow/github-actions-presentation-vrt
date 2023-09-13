@@ -31,21 +31,24 @@ runs:
       working-directory: ${{ github.action_path }}
       run: npm install
 
+    - name: Setup tmate session
+      # if: ${{ failure() }}
+      working-directory: ${{ github.action_path }}
+      uses: mxschmitt/action-tmate@v3
+      with:
+        detached: true
+
     - name: update backstop config
       shell: bash
       working-directory: ${{ github.action_path }}
       run: |
+        echo ${PWD}
         echo $(cat backstop-orig.json | jq --arg testurl "${{ inputs.testurl }}" --arg refurl "${{ inputs.referenceurl }}" '.scenarios.[].url |= sub("https://example-dev.com/";$testurl) | .scenarios.[].referenceUrl |= sub("https://example.com/";$refurl)') > backstop.json
 
     - name: run reference
       shell: bash
       working-directory: ${{ github.action_path }}
       run: backstop reference
-
-    - name: Setup tmate session
-      # if: ${{ failure() }}
-      working-directory: ${{ github.action_path }}
-      uses: mxschmitt/action-tmate@v3
 
     - name: run test
       id: test-results
