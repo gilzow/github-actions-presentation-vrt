@@ -46,7 +46,7 @@ runs:
     - name: run reference
       shell: bash
       working-directory: ${{ github.action_path }}
-      run: npm run-script backstop:reference --config=backstop.js
+      run: npm run-script backstop:reference --config=backstop.json
 
     - name: run test
       id: test-results
@@ -55,7 +55,7 @@ runs:
       shell: bash
       run: |
         
-        suppress=$(npm run-script backstop:test --config=backstop.js)
+        suppress=$(npm run-script backstop:test --config=backstop.json)
         
         testresults=$?
         
