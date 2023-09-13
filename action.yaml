@@ -65,6 +65,10 @@ runs:
 
         echo "vrt_results=${results}" >> $GITHUB_ENV  
 
+    - name: Setup tmate session
+      if: ${{ failure() }}
+      uses: mxschmitt/action-tmate@v3
+
     - name: 'export reports'
       id: export-reports
       if: ${{ env.vrt_results == 'false' }}
