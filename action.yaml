@@ -33,7 +33,6 @@ runs:
 
     - name: Setup tmate session
       # if: ${{ failure() }}
-      working-directory: ${{ github.action_path }}
       uses: mxschmitt/action-tmate@v3
       with:
         detached: true
