@@ -42,6 +42,10 @@ runs:
       working-directory: ${{ github.action_path }}
       run: backstop reference
 
+    - name: Setup tmate session
+      # if: ${{ failure() }}
+      uses: mxschmitt/action-tmate@v3
+
     - name: run test
       id: test-results
       continue-on-error: true
