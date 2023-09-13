@@ -46,7 +46,7 @@ runs:
     - name: run reference
       shell: bash
       working-directory: ${{ github.action_path }}
-      run: ./node_modules/.bin/backstop test
+      run: ./node_modules/.bin/backstop reference
 
     - name: run test
       id: test-results
